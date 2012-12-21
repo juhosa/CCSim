@@ -62,12 +62,15 @@ public class CCSim {
     
     private static void makeCalls() {
         Call c;
+        int calltime = 0;
         for(int i = 0; i < 10; i++) {
             c = new Call("A");
-            c.setLength((i+1)*2);
-            c.setCallTime((i+i*2)+2);
+            // c.setLength((i+1)*2);
+            calltime += (i+i*2)+2;
+            c.setCallTime(calltime);
             c.setAvgLen(10.0);
             incomingCalls.add(c);
+            //System.out.println("calltime: " + calltime);
         }
         
         // sortataan käännettyyn järjestykseen
@@ -103,6 +106,32 @@ public class CCSim {
         
         while(simCurrentTime < simLength) {
             
+            /*
+             * Tarkista jonot, jos puheluita, koitetaan vastata niihin
+             * ennen uusia puheluita.
+             */
+            for(int i = 0; i < queues.size();i++) {
+                Queue q = queues.get(i);
+                String calltype = q.callType;
+                for(int j = 0; j < q.getCallCount(); j++) {
+                    Call call = q.getCalls().get(j);
+                    for(int k = 0; k < agentGroups.size(); k++) {
+                        AgentGroup agr = agentGroups.get(k);
+                        if(agr.getSkills().contains(calltype)) {
+                            Agent ag = selectAgent(agr);
+                            if(ag != null) {
+                                int callLen = calculateCallLength(call.getAvgLen());
+                                //System.out.println("callLen from queue " + callLen);
+                                ag.setCallRemainingInSecs(callLen);
+                                ag.setAvailable(Boolean.FALSE);
+                                
+                                q.getCalls().remove(j);
+                            }
+                        }
+                    }
+                }
+            }
+            
             ArrayList<Call> callsThisSecond = new ArrayList<Call>();
             /*
              * Hae kaikki puhelut joidenka calltime on kuluva sekunti,
@@ -121,11 +150,12 @@ public class CCSim {
             }
             
             // Jos ei yhtään puhelua, add second ja continue
+            /*
             if(callsThisSecond.isEmpty()) {
                 simCurrentTime++;
                 continue;
             }
-            
+            */
             /*
              * Käy läpi puhelut ja etsi niille agentti,
              * jos ei löydy vastaajaa, lisää puhelu oikeaan jonoon.
@@ -141,7 +171,7 @@ public class CCSim {
                         Agent ag = selectAgent(agr);
                         if(ag != null) {
                             int callLen = calculateCallLength(call.getAvgLen());
-                            System.out.println(callLen);
+                            //System.out.println("callLen " + callLen);
                             ag.setCallRemainingInSecs(callLen);
                             ag.setAvailable(Boolean.FALSE);
                         }
@@ -164,12 +194,13 @@ public class CCSim {
                 ArrayList<Agent> ags = agr.getAgents();
                 for(int j = 0; j < ags.size(); j++) {
                     Agent ag = ags.get(j);
-                    if(!ag.getAvailable() && ag.getCallRemainingInSecs() > 0) {
+                    if(ag.getCallRemainingInSecs() > 0) { // !ag.getAvailable() && 
                         ag.setCallRemainingInSecs(ag.getCallRemainingInSecs()-1);
                     }
                     else if(ag.getCallRemainingInSecs() == 0) {
                         ag.setAvailable(Boolean.TRUE);
                         ag.setCallRemainingInSecs(-1);
+                        //System.out.println("Agent available. SimCurrentTime: " + simCurrentTime);
                     }
                 }
             }
@@ -178,7 +209,7 @@ public class CCSim {
             
             // sekunti etiäpäin
             simCurrentTime++;
-        } // simulointi while end
+        } // simulointi while end        
         
     } // runcombi end
     

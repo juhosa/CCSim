@@ -9,7 +9,7 @@ package ccsim;
  * @author Käyttäjä
  */
 public class Call {
-    private int length;
+    //private int length;
     private String type;
     private int callTime;
     private double avgLen;
@@ -18,6 +18,7 @@ public class Call {
         this.type = t;
     }
     
+    /*
     public int getLength() {
         return length;
     }
@@ -25,7 +26,8 @@ public class Call {
     public void setLength(int length) {
         this.length = length;
     }
-
+    */
+    
     public String getType() {
         return type;
     }
