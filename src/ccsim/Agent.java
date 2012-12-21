@@ -13,7 +13,6 @@ public class Agent {
     private int callRemainingInSecs;
     
     public Agent() {
-        // -1 means no calls
         this.callRemainingInSecs = -1;
         this.available = true;
     }

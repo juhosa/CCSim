@@ -99,11 +99,90 @@ public class CCSim {
         
         while(simCurrentTime < simLength) {
             
+            ArrayList<Call> callsThisSecond = new ArrayList<Call>();
+            /*
+             * Hae kaikki puhelut joidenka calltime on kuluva sekunti,
+             * poista löytyneet incomingcalls-listasta
+             */
+            for(int i = incomingCalls.size()-1; i > 0; i--){
+                Call c = incomingCalls.get(i);
+                int calltime = c.getCallTime();
+                if(calltime > simCurrentTime) {
+                    break;
+                }
+                else if(calltime == simCurrentTime) {
+                    callsThisSecond.add(c);
+                    incomingCalls.remove(i);
+                }
+            }
             
+            // Jos ei yhtään puhelua, add second ja continue
+            if(callsThisSecond.isEmpty()) {
+                simCurrentTime++;
+                continue;
+            }
+            
+            /*
+             * Käy läpi puhelut ja etsi niille agentti,
+             * jos ei löydy vastaajaa, lisää puhelu oikeaan jonoon.
+             */ 
+            for(int i = 0; i < callsThisSecond.size(); i++) {
+                String calltype = callsThisSecond.get(i).getType();
+                for(int j = 0; j < agentGroups.size(); j++) {
+                    AgentGroup agr = agentGroups.get(j);
+                    if(agr.getSkills().contains(calltype)) {
+                        // Kutsutaan metodia joka tekee asetusten mukaisen
+                        // valinnan agentin valintaan
+                        Agent ag = selectAgent(agr);
+                    }
+                }
+            }
+            
+            /*
+             * Poista meneillään olevista puheluista (eli varatuista agenteista)
+             * sekunti.
+             * Tarkista myös jos puhelu loppunut edellisellä sekunnilla
+             * ja aseta agentti vapaaksi.
+             */
+            for(int i = 0; i < agentGroups.size(); i++) {
+                AgentGroup agr = agentGroups.get(i);
+                ArrayList<Agent> ags = agr.getAgents();
+                for(int j = 0; j < ags.size(); j++) {
+                    Agent ag = ags.get(j);
+                    if(!ag.getAvailable() && ag.getCallRemainingInSecs() > 0) {
+                        ag.setCallRemainingInSecs(ag.getCallRemainingInSecs()-1);
+                    }
+                    else if(ag.getCallRemainingInSecs() == 0) {
+                        ag.setAvailable(Boolean.TRUE);
+                        ag.setCallRemainingInSecs(-1);
+                    }
+                }
+            }
+            
+            //System.out.println("Aika: " + simCurrentTime + " puheluita tulossa: " + incomingCalls.size());
             
             // sekunti etiäpäin
             simCurrentTime++;
         } // simulointi while end
         
+    } // runcombi end
+    
+    private static Agent selectAgent(AgentGroup agr) {
+        Agent ret;
+        ret = selectFirstAvailable(agr);
+        return ret;
+    }
+    
+    private static Agent selectFirstAvailable(AgentGroup agr) {
+        Agent ret = null;
+        ArrayList<Agent> ags = agr.getAgents();
+        for(int i = 0; i < ags.size(); i++) {
+            Agent ag = ags.get(i);
+            if(ag.getAvailable()) {
+                ret = ag;
+            }
+        }
+        
+        return ret;
     }
 }

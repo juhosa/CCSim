@@ -45,8 +45,6 @@ public class AgentGroup {
         this.skills = skills;
     }
     
-    
-    
     public void addAgent(Agent a) {
         this.agents.add(a);
     }
