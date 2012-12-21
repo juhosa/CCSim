@@ -12,6 +12,7 @@ public class Call {
     private int length;
     private String type;
     private int callTime;
+    private double avgLen;
     
     public Call(String t) {
         this.type = t;
@@ -39,6 +40,14 @@ public class Call {
 
     public void setCallTime(int callTime) {
         this.callTime = callTime;
+    }
+
+    public double getAvgLen() {
+        return avgLen;
+    }
+
+    public void setAvgLen(double avgLen) {
+        this.avgLen = avgLen;
     }
     
     

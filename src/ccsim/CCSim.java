@@ -35,6 +35,9 @@ public class CCSim {
         // run teh simulation for this combination of agents
         runCombination(combi);
         
+        System.out.println("Calls in queue after this combi round: " + 
+                queues.get(0).getCallCount());
+        
     }
     
     private static void readSettings() {
@@ -63,6 +66,7 @@ public class CCSim {
             c = new Call("A");
             c.setLength((i+1)*2);
             c.setCallTime((i+i*2)+2);
+            c.setAvgLen(10.0);
             incomingCalls.add(c);
         }
         
@@ -127,13 +131,24 @@ public class CCSim {
              * jos ei löydy vastaajaa, lisää puhelu oikeaan jonoon.
              */ 
             for(int i = 0; i < callsThisSecond.size(); i++) {
-                String calltype = callsThisSecond.get(i).getType();
+                Call call = callsThisSecond.get(i);
+                String calltype = call.getType();
                 for(int j = 0; j < agentGroups.size(); j++) {
                     AgentGroup agr = agentGroups.get(j);
                     if(agr.getSkills().contains(calltype)) {
                         // Kutsutaan metodia joka tekee asetusten mukaisen
                         // valinnan agentin valintaan
                         Agent ag = selectAgent(agr);
+                        if(ag != null) {
+                            int callLen = calculateCallLength(call.getAvgLen());
+                            System.out.println(callLen);
+                            ag.setCallRemainingInSecs(callLen);
+                            ag.setAvailable(Boolean.FALSE);
+                        }
+                        else {
+                            // Laita puhelu jonoon
+                            insertCallToCorrectQueue(call);
+                        }
                     }
                 }
             }
@@ -166,6 +181,24 @@ public class CCSim {
         } // simulointi while end
         
     } // runcombi end
+    
+    private static int calculateCallLength(double avg) {
+        int ret = -1;
+        
+        ret = (int)(Math.floor(Math.random()*(avg+5))+(avg-5));
+        
+        return ret;
+    }
+    
+    private static void insertCallToCorrectQueue(Call call) {
+        for(int i = 0; i < queues.size(); i++) {
+            Queue q = queues.get(i);
+            if(q.getCallType().equals(call.getType())) {
+                q.addCallToQueue(call);
+                break;
+            }
+        }
+    }
     
     private static Agent selectAgent(AgentGroup agr) {
         Agent ret;

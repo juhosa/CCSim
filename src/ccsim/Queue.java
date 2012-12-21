@@ -16,6 +16,7 @@ public class Queue {
     
     public Queue(String ct) {
         callType = ct;
+        calls = new ArrayList<Call>();
     }
 
     public ArrayList<Call> getCalls() {
@@ -36,5 +37,9 @@ public class Queue {
     
     public int getCallCount() {
         return this.calls.size();
+    }
+    
+    public void addCallToQueue(Call call) {
+        calls.add(call);
     }
 }
