@@ -18,7 +18,7 @@ public class AgentGroup {
     
     public AgentGroup(String n) {
         name = n;
-        agents = new ArrayList<>();
+        agents = new ArrayList<Agent>();
     }
 
     public ArrayList<Agent> getAgents() {

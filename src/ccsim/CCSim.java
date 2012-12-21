@@ -13,10 +13,10 @@ import java.util.Collections;
  */
 public class CCSim {
     
-    public static ArrayList<Queue> queues = new ArrayList<>();
-    public static ArrayList<Call> incomingCalls = new ArrayList<>();
+    public static ArrayList<Queue> queues = new ArrayList<Queue>();
+    public static ArrayList<Call> incomingCalls = new ArrayList<Call>();
     
-    public static ArrayList<AgentGroup> agentGroups = new ArrayList<>();
+    public static ArrayList<AgentGroup> agentGroups = new ArrayList<AgentGroup>();
     
     
     /**
@@ -58,7 +58,7 @@ public class CCSim {
     }
     
     private static void makeCalls() {
-        Call c = null;
+        Call c;
         for(int i = 0; i < 10; i++) {
             c = new Call("A");
             c.setLength((i+1)*2);
@@ -75,7 +75,7 @@ public class CCSim {
     private static void makeAgentsIntoGroups(int grCount) {
         for(int k = 0; k < grCount; k++) {
             AgentGroup ag = new AgentGroup("S1");
-            ArrayList<String> skills = new ArrayList<>();
+            ArrayList<String> skills = new ArrayList<String>();
             skills.add("A");
             skills.add("B");
             ag.setSkills(skills);
