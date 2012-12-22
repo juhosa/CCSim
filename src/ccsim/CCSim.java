@@ -21,6 +21,7 @@ public class CCSim {
     public static int acceptableAnswerTime = 20;
     public static int callsAnsweredIndesiredTime = 0;
     public static int callsNotAnsweredIndesiredtime = 0;
+    public static ArrayList<CombinationInfo> combinationInfos = new ArrayList<CombinationInfo>();
     
     public static int simLength = 200;
     public static int rounds = 5;
@@ -40,16 +41,18 @@ public class CCSim {
         combi[1] = 2;
         combi[2] = 2;
         
+        // this many rounds per combination
         for(int i = 0; i < rounds; i++) {
             makeCalls();
             // run teh simulation for this combination of agents
             runCombination(combi);
+            calculateAndSaveRoundInfo(i, combi);
             reset();
         }
+        calculateAndSaveCombinationInfo();
         
         
-        
-    }
+    } // main end
     
     private static void readSettings() {
         // Luetaan sitte filu
@@ -113,6 +116,7 @@ public class CCSim {
     private static void makeAgentsIntoGroups(int grCount) {
         for(int k = 0; k < grCount; k++) {
             AgentGroup ag = new AgentGroup("S1");
+            ag.setCost(9.5);
             ArrayList<String> skills = new ArrayList<String>();
             ArrayList<Double> lambdas = new ArrayList<Double>();
             skills.add("A");
@@ -275,6 +279,34 @@ public class CCSim {
         callsNotAnsweredIndesiredtime = 0;
         queues = new ArrayList<Queue>();
         incomingCalls = new ArrayList<Call>();
+    }
+    
+    private static void calculateAndSaveRoundInfo(int roundNum, int[] combi) {
+        CombinationInfo comp = new CombinationInfo();
+        comp.setCombi(combi);
+        
+        RoundInfo round = new RoundInfo();
+        round.setRoundNumber(roundNum);
+        round.setCallsOverAWT(callsNotAnsweredIndesiredtime);
+        round.setCallsUnderAWT(callsAnsweredIndesiredTime);
+        round.calculateServicelevel();
+        
+        comp.addRound(round);
+        
+        combinationInfos.add(comp);
+    }
+    
+    private static void calculateAndSaveCombinationInfo() {
+        // Lasketaan combinationInfos listan vikan elementin avg SL
+        // ja jotain
+        
+        CombinationInfo comb = combinationInfos.get(combinationInfos.size()-1);
+        
+        // Lasketaan totalcost
+        
+        
+        // Lasketaan avg SL
+        
     }
     
     private static double returnLambda(AgentGroup agr, String calltype) {

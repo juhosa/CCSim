@@ -16,6 +16,7 @@ public class AgentGroup {
     private String name;
     private ArrayList<String> skills;
     private ArrayList<Double> lambdas;
+    private double cost;
     
     public AgentGroup(String n) {
         this.name = n;
@@ -57,6 +58,15 @@ public class AgentGroup {
     public void setLambdas(ArrayList<Double> lambdas) {
         this.lambdas = lambdas;
     }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+    
     
     
     
