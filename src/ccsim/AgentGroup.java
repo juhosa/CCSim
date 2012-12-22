@@ -15,10 +15,11 @@ public class AgentGroup {
     private ArrayList<Agent> agents;
     private String name;
     private ArrayList<String> skills;
+    private ArrayList<Double> lambdas;
     
     public AgentGroup(String n) {
-        name = n;
-        agents = new ArrayList<Agent>();
+        this.name = n;
+        this.agents = new ArrayList<Agent>();
     }
 
     public ArrayList<Agent> getAgents() {
@@ -48,5 +49,15 @@ public class AgentGroup {
     public void addAgent(Agent a) {
         this.agents.add(a);
     }
+
+    public ArrayList<Double> getLambdas() {
+        return lambdas;
+    }
+
+    public void setLambdas(ArrayList<Double> lambdas) {
+        this.lambdas = lambdas;
+    }
+    
+    
     
 }

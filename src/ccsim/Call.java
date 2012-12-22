@@ -13,9 +13,12 @@ public class Call {
     private String type;
     private int callTime;
     private double avgLen;
+    private int timeInQueue;
+    private double arrivalRate;
     
     public Call(String t) {
         this.type = t;
+        this.timeInQueue = 0;
     }
     
     /*
@@ -50,6 +53,22 @@ public class Call {
 
     public void setAvgLen(double avgLen) {
         this.avgLen = avgLen;
+    }
+
+    public int getTimeInQueue() {
+        return timeInQueue;
+    }
+
+    public void setTimeInQueue(int timeInQueue) {
+        this.timeInQueue = timeInQueue;
+    }
+
+    public double getArrivalRate() {
+        return arrivalRate;
+    }
+
+    public void setArrivalRate(double arrivalRate) {
+        this.arrivalRate = arrivalRate;
     }
     
     

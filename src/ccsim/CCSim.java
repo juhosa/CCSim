@@ -18,6 +18,12 @@ public class CCSim {
     
     public static ArrayList<AgentGroup> agentGroups = new ArrayList<AgentGroup>();
     
+    public static int acceptableAnswerTime = 20;
+    public static int callsAnsweredIndesiredTime = 0;
+    public static int callsNotAnsweredIndesiredtime = 0;
+    
+    public static int simLength = 200;
+    
     
     /**
      * @param args the command line arguments
@@ -37,6 +43,8 @@ public class CCSim {
         
         System.out.println("Calls in queue after this combi round: " + 
                 queues.get(0).getCallCount());
+        
+        reset();
         
     }
     
@@ -63,10 +71,30 @@ public class CCSim {
     private static void makeCalls() {
         Call c;
         int calltime = 0;
+        /*
         for(int i = 0; i < 10; i++) {
             c = new Call("A");
+            c.setArrivalRate(10.0);
             // c.setLength((i+1)*2);
-            calltime += (i+i*2)+2;
+            //calltime += (i+i*2)+2;
+            calltime += calculateCallTime(c.getArrivalRate());
+            c.setCallTime(calltime);
+            c.setAvgLen(10.0);
+            incomingCalls.add(c);
+            System.out.println("calltime: " + calltime);
+        }
+        */
+        while(calltime <= simLength) {
+            c = new Call("A");
+            c.setArrivalRate(10.0);
+            // c.setLength((i+1)*2);
+            //calltime += (i+i*2)+2;
+            calltime += calculateCallTime(c.getArrivalRate());
+            
+            if(calltime > simLength) {
+                break;
+            }
+            
             c.setCallTime(calltime);
             c.setAvgLen(10.0);
             incomingCalls.add(c);
@@ -83,9 +111,11 @@ public class CCSim {
         for(int k = 0; k < grCount; k++) {
             AgentGroup ag = new AgentGroup("S1");
             ArrayList<String> skills = new ArrayList<String>();
+            ArrayList<Double> lambdas = new ArrayList<Double>();
             skills.add("A");
-            skills.add("B");
+            lambdas.add(new Double(10.0));            
             ag.setSkills(skills);
+            ag.setLambdas(lambdas);
 
             for(int i = 0; i < 1; i++) {
                 Agent a = new Agent();
@@ -102,7 +132,6 @@ public class CCSim {
     // this is where the magic happens
     private static void runCombination(int[] combi) {
         int simCurrentTime = 0;
-        int simLength = 600;
         
         while(simCurrentTime < simLength) {
             
@@ -120,12 +149,25 @@ public class CCSim {
                         if(agr.getSkills().contains(calltype)) {
                             Agent ag = selectAgent(agr);
                             if(ag != null) {
-                                int callLen = calculateCallLength(call.getAvgLen());
+                                double lambda = returnLambda(agr, calltype);
+                                int callLen = calculateCallLength(lambda); // call.getAvgLen()
                                 //System.out.println("callLen from queue " + callLen);
                                 ag.setCallRemainingInSecs(callLen);
                                 ag.setAvailable(Boolean.FALSE);
                                 
+                                int waitTime = simCurrentTime - call.getCallTime();
+                                
+                                if(waitTime <= acceptableAnswerTime) {
+                                    callsAnsweredIndesiredTime++;
+                                }
+                                else {
+                                    callsNotAnsweredIndesiredtime++;
+                                }
+                                
                                 q.getCalls().remove(j);
+                            }
+                            else {
+                                // Breakkaa pois pitkälle koska ei vapaita ag
                             }
                         }
                     }
@@ -137,7 +179,7 @@ public class CCSim {
              * Hae kaikki puhelut joidenka calltime on kuluva sekunti,
              * poista löytyneet incomingcalls-listasta
              */
-            for(int i = incomingCalls.size()-1; i > 0; i--){
+            for(int i = incomingCalls.size()-1; i >= 0; i--){
                 Call c = incomingCalls.get(i);
                 int calltime = c.getCallTime();
                 if(calltime > simCurrentTime) {
@@ -170,10 +212,13 @@ public class CCSim {
                         // valinnan agentin valintaan
                         Agent ag = selectAgent(agr);
                         if(ag != null) {
-                            int callLen = calculateCallLength(call.getAvgLen());
+                            double lambda = returnLambda(agr, calltype);
+                            int callLen = calculateCallLength(lambda); // call.getAvgLen()
                             //System.out.println("callLen " + callLen);
                             ag.setCallRemainingInSecs(callLen);
                             ag.setAvailable(Boolean.FALSE);
+                            
+                            callsAnsweredIndesiredTime++;
                         }
                         else {
                             // Laita puhelu jonoon
@@ -199,8 +244,7 @@ public class CCSim {
                     }
                     else if(ag.getCallRemainingInSecs() == 0) {
                         ag.setAvailable(Boolean.TRUE);
-                        ag.setCallRemainingInSecs(-1);
-                        //System.out.println("Agent available. SimCurrentTime: " + simCurrentTime);
+                        ag.setCallRemainingInSecs(-1);                        
                     }
                 }
             }
@@ -209,15 +253,51 @@ public class CCSim {
             
             // sekunti etiäpäin
             simCurrentTime++;
-        } // simulointi while end        
+        } // simulointi while end
+        
+        /*
+         * Juttujen printtailua
+         */
+        System.out.println("Puhelut joihin vastattiin alle AWT: " + callsAnsweredIndesiredTime);
+        System.out.println("Puhelut joihin vastattiin yli AWT: " + callsNotAnsweredIndesiredtime);
         
     } // runcombi end
+    
+    private static void reset() {
+        callsAnsweredIndesiredTime = 0;
+        callsNotAnsweredIndesiredtime = 0;
+        queues = new ArrayList<Queue>();
+        incomingCalls = new ArrayList<Call>();
+    }
+    
+    private static double returnLambda(AgentGroup agr, String calltype) {
+        double ret = -1.0;
+        int index = -1;
+        for(int i = 0; i < agr.getSkills().size(); i++) {
+            String skill = agr.getSkills().get(i);
+            
+            if(skill.equals(calltype)) {
+                index = i;
+                break;
+            }
+        }
+        
+        ret = agr.getLambdas().get(index).doubleValue();
+        
+        return ret;
+    }
     
     private static int calculateCallLength(double avg) {
         int ret = -1;
         
-        ret = (int)(Math.floor(Math.random()*(avg+5))+(avg-5));
+        ret = (int)(Math.floor(Math.random()*(avg+(avg/2)))+(avg-(avg/2)));
         
+        return ret;
+    }
+    
+    private static int calculateCallTime(double arr) {
+        int ret = -1;
+        ret = (int)(Math.floor(Math.random()*(arr+(arr/2)))+(arr-(arr/2)));
         return ret;
     }
     
