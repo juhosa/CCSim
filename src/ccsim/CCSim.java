@@ -23,6 +23,7 @@ public class CCSim {
     public static int callsNotAnsweredIndesiredtime = 0;
     
     public static int simLength = 200;
+    public static int rounds = 5;
     
     
     /**
@@ -33,18 +34,20 @@ public class CCSim {
         readSettings();
         
         makeCombinations();
-        makeCalls();
+        
         int[] combi = new int[3];
         combi[0] = 2;
         combi[1] = 2;
         combi[2] = 2;
-        // run teh simulation for this combination of agents
-        runCombination(combi);
         
-        System.out.println("Calls in queue after this combi round: " + 
-                queues.get(0).getCallCount());
+        for(int i = 0; i < rounds; i++) {
+            makeCalls();
+            // run teh simulation for this combination of agents
+            runCombination(combi);
+            reset();
+        }
         
-        reset();
+        
         
     }
     
@@ -260,6 +263,10 @@ public class CCSim {
          */
         System.out.println("Puhelut joihin vastattiin alle AWT: " + callsAnsweredIndesiredTime);
         System.out.println("Puhelut joihin vastattiin yli AWT: " + callsNotAnsweredIndesiredtime);
+        
+        //System.out.println("Calls in queue after this combi round: " + queues.get(0).getCallCount());
+        
+        System.out.println();
         
     } // runcombi end
     
