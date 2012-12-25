@@ -56,9 +56,11 @@ public class RoundInfo {
     
     public void calculateServicelevel() {
         int sum = this.callsOverAWT + this.callsUnderAWT;
-        System.out.println(sum);
-        double sl = this.callsOverAWT / sum * 100.0;
-        System.out.println(sl);
+        //System.out.println("callsover: " + this.callsOverAWT);
+        //System.out.println("callsunder: " + this.callsUnderAWT);
+        //System.out.println("sum:" +sum);
+        double sl = (double)this.callsUnderAWT / sum * 100.0;
+        //System.out.println("sl: " + sl);
         this.serviceLevel = sl;
     }
     

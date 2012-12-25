@@ -23,8 +23,8 @@ public class CCSim {
     public static int callsNotAnsweredIndesiredtime = 0;
     public static ArrayList<CombinationInfo> combinationInfos = new ArrayList<CombinationInfo>();
     
-    public static int simLength = 200;
-    public static int rounds = 5;
+    public static int simLength = 100;
+    public static int rounds = 2;
     
     
     /**
@@ -90,7 +90,7 @@ public class CCSim {
             System.out.println("calltime: " + calltime);
         }
         */
-        while(calltime <= simLength) {
+        while(calltime < simLength) {
             c = new Call("A");
             c.setArrivalRate(10.0);
             // c.setLength((i+1)*2);
@@ -198,13 +198,6 @@ public class CCSim {
                 }
             }
             
-            // Jos ei yhtään puhelua, add second ja continue
-            /*
-            if(callsThisSecond.isEmpty()) {
-                simCurrentTime++;
-                continue;
-            }
-            */
             /*
              * Käy läpi puhelut ja etsi niille agentti,
              * jos ei löydy vastaajaa, lisää puhelu oikeaan jonoon.
@@ -270,7 +263,7 @@ public class CCSim {
         
         //System.out.println("Calls in queue after this combi round: " + queues.get(0).getCallCount());
         
-        System.out.println();
+        //System.out.println();
         
     } // runcombi end
     
@@ -279,14 +272,25 @@ public class CCSim {
         callsNotAnsweredIndesiredtime = 0;
         queues = new ArrayList<Queue>();
         incomingCalls = new ArrayList<Call>();
+        System.out.println();
     }
     
     private static void calculateAndSaveRoundInfo(int roundNum, int[] combi) {
+        // Katotaan jonoon jääneet puhelut
+        int tmp = 0;
+        for(int i = 0; i < queues.size(); i++) {
+            Queue q = queues.get(i);
+            tmp += q.getCallCount();
+        }
+        System.out.println("Jonoon jaaneet puhelut: " + tmp);
+        
+        
         CombinationInfo comp = new CombinationInfo();
         comp.setCombi(combi);
         
         RoundInfo round = new RoundInfo();
         round.setRoundNumber(roundNum);
+        callsNotAnsweredIndesiredtime += tmp;
         round.setCallsOverAWT(callsNotAnsweredIndesiredtime);
         round.setCallsUnderAWT(callsAnsweredIndesiredTime);
         round.calculateServicelevel();
