@@ -290,6 +290,7 @@ public class CCSim {
         round.setCallsOverAWT(callsNotAnsweredIndesiredtime);
         round.setCallsUnderAWT(callsAnsweredIndesiredTime);
         round.calculateServicelevel();
+        System.out.println("SL for this round: " + round.getServiceLevel());
         
         comp.addRound(round);
         
@@ -306,6 +307,16 @@ public class CCSim {
         
         
         // Lasketaan avg SL
+        double tmp = 0.0;
+        ArrayList<RoundInfo> rounds = comb.getRounds();
+        System.out.println("Rounds size in combi: " + rounds.size());
+        for(int i = 0; i < rounds.size(); i++) {
+            RoundInfo r = rounds.get(i);
+            tmp += r.getServiceLevel();
+        }
+        double sl = tmp / (double)rounds.size();
+        
+        System.out.println("combi SL: " + sl);
         
     }
     
