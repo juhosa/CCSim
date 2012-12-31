@@ -17,6 +17,8 @@ public class AgentGroup {
     private ArrayList<String> skills;
     private ArrayList<Double> lambdas;
     private double cost;
+    private int agentsMin;
+    private int agentsMax;
     
     public AgentGroup(String n) {
         this.name = n;
@@ -65,6 +67,22 @@ public class AgentGroup {
 
     public void setCost(double cost) {
         this.cost = cost;
+    }
+
+    public int getAgentsMin() {
+        return agentsMin;
+    }
+
+    public void setAgentsMin(int agentsMin) {
+        this.agentsMin = agentsMin;
+    }
+
+    public int getAgentsMax() {
+        return agentsMax;
+    }
+
+    public void setAgentsMax(int agentsMax) {
+        this.agentsMax = agentsMax;
     }
     
     

@@ -41,16 +41,21 @@ public class CCSim {
         combi[1] = 2;
         combi[2] = 2;
         
-        // this many rounds per combination
-        for(int i = 0; i < rounds; i++) {
-            makeCalls();
-            // run teh simulation for this combination of agents
-            runCombination(combi);
-            calculateAndSaveRoundInfo(i, combi);
-            reset();
+        for(int k = 0; k < 1; k++) {
+            CombinationInfo combInfo = new CombinationInfo();
+            combInfo.setCombi(combi);
+            combinationInfos.add(combInfo);
+            // this many rounds per combination
+            for(int i = 0; i < rounds; i++) {
+                System.out.println("Round " + (i+1) + ":");
+                makeCalls();
+                // run teh simulation for this combination of agents
+                runCombination(combi);
+                calculateAndSaveRoundInfo(i, combi);
+                reset();
+            }
+            calculateAndSaveCombinationInfo();
         }
-        calculateAndSaveCombinationInfo();
-        
         
     } // main end
     
@@ -297,8 +302,8 @@ public class CCSim {
         System.out.println("Jonoon jaaneet puhelut: " + tmp);
         
         
-        CombinationInfo comp = new CombinationInfo();
-        comp.setCombi(combi);
+        CombinationInfo comp = combinationInfos.get(combinationInfos.size()-1);
+        //comp.setCombi(combi);
         
         RoundInfo round = new RoundInfo();
         round.setRoundNumber(roundNum);
@@ -310,7 +315,8 @@ public class CCSim {
         
         comp.addRound(round);
         
-        combinationInfos.add(comp);
+        //combinationInfos.add(comp);
+        System.out.println("Roundinfo added to combination info.");
     }
     
     private static void calculateAndSaveCombinationInfo() {
@@ -324,13 +330,13 @@ public class CCSim {
         
         // Lasketaan avg SL
         double tmp = 0.0;
-        ArrayList<RoundInfo> rounds = comb.getRounds();
-        System.out.println("Rounds size in combi: " + rounds.size());
-        for(int i = 0; i < rounds.size(); i++) {
-            RoundInfo r = rounds.get(i);
+        ArrayList<RoundInfo> ro = comb.getRounds();
+        System.out.println("Rounds size in combi: " + ro.size());
+        for(int i = 0; i < ro.size(); i++) {
+            RoundInfo r = ro.get(i);
             tmp += r.getServiceLevel();
         }
-        double sl = tmp / (double)rounds.size();
+        double sl = tmp / (double)ro.size();
         
         System.out.println("combi SL: " + sl);
         
