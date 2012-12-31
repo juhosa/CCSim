@@ -23,7 +23,7 @@ public class CCSim {
     public static int callsNotAnsweredIndesiredtime = 0;
     public static ArrayList<CombinationInfo> combinationInfos = new ArrayList<CombinationInfo>();
     
-    public static int simLength = 100;
+    public static int simLength = 200;
     public static int rounds = 2;
     
     
@@ -77,19 +77,7 @@ public class CCSim {
     private static void makeCalls() {
         Call c;
         int calltime = 0;
-        /*
-        for(int i = 0; i < 10; i++) {
-            c = new Call("A");
-            c.setArrivalRate(10.0);
-            // c.setLength((i+1)*2);
-            //calltime += (i+i*2)+2;
-            calltime += calculateCallTime(c.getArrivalRate());
-            c.setCallTime(calltime);
-            c.setAvgLen(10.0);
-            incomingCalls.add(c);
-            System.out.println("calltime: " + calltime);
-        }
-        */
+        
         while(calltime < simLength) {
             c = new Call("A");
             c.setArrivalRate(10.0);
@@ -109,7 +97,13 @@ public class CCSim {
         
         // sortataan käännettyyn järjestykseen
         Collections.sort(incomingCalls, new sortByCalltime());
-       
+        
+        /*
+        for(int i = 0; i < incomingCalls.size(); i++) {
+            System.out.println(incomingCalls.get(i).getCallTime());
+        }
+        */
+        
         System.out.println("In total " + incomingCalls.size() + " calls generated.");
     } // makeCallss end
     
@@ -170,7 +164,8 @@ public class CCSim {
                                 else {
                                     callsNotAnsweredIndesiredtime++;
                                 }
-                                
+                                //System.out.println("Jonosta vastatun puh calltime: " + call.getCallTime()
+                                //        + " ja kesto: " + callLen + " jonotusaika: " + waitTime);
                                 q.getCalls().remove(j);
                             }
                             else {
@@ -217,7 +212,8 @@ public class CCSim {
                             //System.out.println("callLen " + callLen);
                             ag.setCallRemainingInSecs(callLen);
                             ag.setAvailable(Boolean.FALSE);
-                            
+                            //System.out.println("Heti vastatun puh calltime: " + call.getCallTime()
+                            //        + " ja kesto: " + callLen);
                             callsAnsweredIndesiredTime++;
                         }
                         else {
@@ -270,8 +266,24 @@ public class CCSim {
     private static void reset() {
         callsAnsweredIndesiredTime = 0;
         callsNotAnsweredIndesiredtime = 0;
-        queues = new ArrayList<Queue>();
+        //queues = new ArrayList<Queue>();
+        
+        for(int i = 0; i < queues.size(); i++) {
+            queues.get(i).emptyQueue();
+        }
+        
         incomingCalls = new ArrayList<Call>();
+        
+        // Aseta agentit vapaiksi ja nollaa kestot
+        for(int i = 0; i < agentGroups.size(); i++) {
+            ArrayList<Agent> agr = agentGroups.get(i).getAgents();
+            for(int j = 0; j < agr.size(); j++) {
+                Agent ag = agr.get(j);
+                ag.setAvailable(Boolean.TRUE);
+                ag.setCallRemainingInSecs(-1);
+            }
+        }
+        
         System.out.println();
     }
     

@@ -42,4 +42,8 @@ public class Queue {
     public void addCallToQueue(Call call) {
         calls.add(call);
     }
+    
+    public void emptyQueue() {
+        this.calls.clear();
+    }
 }
