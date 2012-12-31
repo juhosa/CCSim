@@ -42,6 +42,7 @@ public class CCSim {
         combi[2] = 2;
         
         for(int k = 0; k < 1; k++) {
+            System.out.println("Combination " + (k+1));
             CombinationInfo combInfo = new CombinationInfo();
             combInfo.setCombi(combi);
             combinationInfos.add(combInfo);
