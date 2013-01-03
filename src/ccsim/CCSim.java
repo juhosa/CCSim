@@ -18,6 +18,8 @@ public class CCSim {
     
     public static ArrayList<AgentGroup> agentGroups = new ArrayList<AgentGroup>();
     
+    public static ArrayList<int[]> combis = new ArrayList<int[]>();
+    
     public static int acceptableAnswerTime = 20;
     public static int callsAnsweredIndesiredTime = 0;
     public static int callsNotAnsweredIndesiredtime = 0;
@@ -36,13 +38,22 @@ public class CCSim {
         
         makeCombinations();
         
-        int[] combi = new int[3];
-        combi[0] = 2;
-        combi[1] = 2;
-        combi[2] = 2;
+        int[] combi1 = new int[2];
+        combi1[0] = 2;
+        combi1[1] = 0;
+        int[] combi2 = new int[2];
+        combi2[0] = 3;
+        combi2[1] = 2;
+        combis.add(combi1);
+        combis.add(combi2);
         
-        for(int k = 0; k < 1; k++) {
+        for(int k = 0; k < combis.size(); k++) {
+            System.out.println();
             System.out.println("Combination " + (k+1));
+            int[] combi = combis.get(k);
+            
+            makeAgentsIntoGroups(combi);
+            
             CombinationInfo combInfo = new CombinationInfo();
             combInfo.setCombi(combi);
             combinationInfos.add(combInfo);
@@ -72,8 +83,25 @@ public class CCSim {
         }
         
         // Luodaan agentit ku o luettu tarpeelliset jutut
-        int groupCount = 1;
-        makeAgentsIntoGroups(groupCount);
+        int groupCount = 2;
+        for(int k = 0; k < groupCount; k++) {
+            AgentGroup ag = new AgentGroup("S" + Integer.toString(k+1));
+            ag.setCost(9.5);
+            ArrayList<String> skills = new ArrayList<String>();
+            ArrayList<Double> lambdas = new ArrayList<Double>();
+            String ski = "A";
+            skills.add(ski);
+            lambdas.add(new Double(10.0));            
+            ag.setSkills(skills);
+            ag.setLambdas(lambdas);
+            
+            agentGroups.add(ag);
+            
+            System.out.println("Agentgroup " + ag.getName() + " created.");
+            
+            ski = "B";
+        }
+        //makeAgentsIntoGroups(groupCount);
     }
     
     private static void makeCombinations() {
@@ -113,26 +141,18 @@ public class CCSim {
         System.out.println("In total " + incomingCalls.size() + " calls generated.");
     } // makeCallss end
     
-    private static void makeAgentsIntoGroups(int grCount) {
-        for(int k = 0; k < grCount; k++) {
-            AgentGroup ag = new AgentGroup("S1");
-            ag.setCost(9.5);
-            ArrayList<String> skills = new ArrayList<String>();
-            ArrayList<Double> lambdas = new ArrayList<Double>();
-            skills.add("A");
-            lambdas.add(new Double(10.0));            
-            ag.setSkills(skills);
-            ag.setLambdas(lambdas);
-
-            for(int i = 0; i < 1; i++) {
+    private static void makeAgentsIntoGroups(int[] combi) {
+        for(int k = 0; k < combi.length; k++) {            
+            
+            AgentGroup agr = agentGroups.get(k);
+            
+            for(int i = 0; i < combi[k]; i++) {
                 Agent a = new Agent();
-                ag.addAgent(a);
-            }
+                agr.addAgent(a);
+            }            
             
-            agentGroups.add(ag);
-            
-            System.out.println(ag.getAgents().size() + " agents created "
-                    + "for group " + ag.getName());
+            System.out.println(agr.getAgents().size() + " agents created "
+                    + "for group " + agr.getName());
         }
     }
     
