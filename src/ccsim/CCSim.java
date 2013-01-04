@@ -4,8 +4,14 @@
  */
 package ccsim;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
@@ -18,7 +24,7 @@ public class CCSim {
     
     public static ArrayList<AgentGroup> agentGroups = new ArrayList<AgentGroup>();
     
-    public static ArrayList<int[]> combis = new ArrayList<int[]>();
+    public static ArrayList<List<Integer>> combis = new ArrayList<List<Integer>>();
     
     public static int acceptableAnswerTime = 20;
     public static int callsAnsweredIndesiredTime = 0;
@@ -26,7 +32,7 @@ public class CCSim {
     public static ArrayList<CombinationInfo> combinationInfos = new ArrayList<CombinationInfo>();
     
     public static int simLength = 200;
-    public static int rounds = 2;
+    public static int rounds = 200;
     
     
     /**
@@ -36,21 +42,28 @@ public class CCSim {
         // Luetaan asetukset
         readSettings();
         
-        makeCombinations();
+        combis = makeCombinations(agentGroups);
         
-        int[] combi1 = new int[2];
-        combi1[0] = 2;
-        combi1[1] = 0;
-        int[] combi2 = new int[2];
-        combi2[0] = 3;
-        combi2[1] = 2;
-        combis.add(combi1);
-        combis.add(combi2);
+        for(int i = 0; i < combis.size(); i++) {
+            for(int j = 0; j < combis.get(i).size(); j++) {
+                System.out.print(combis.get(i).get(j) + " ");
+            }
+            System.out.println();
+        }
+        
+//        int[] combi1 = new int[2];
+//        combi1[0] = 2;
+//        combi1[1] = 0;
+//        int[] combi2 = new int[2];
+//        combi2[0] = 3;
+//        combi2[1] = 2;
+//        combis.add(combi1);
+//        combis.add(combi2);
         
         for(int k = 0; k < combis.size(); k++) {
             System.out.println();
             System.out.println("Combination " + (k+1));
-            int[] combi = combis.get(k);
+            int[] combi = returnIntArray(combis.get(k));
             
             makeAgentsIntoGroups(combi);
             
@@ -59,7 +72,7 @@ public class CCSim {
             combinationInfos.add(combInfo);
             // this many rounds per combination
             for(int i = 0; i < rounds; i++) {
-                System.out.println("Round " + (i+1) + ":");
+                //System.out.println("Round " + (i+1) + ":");
                 makeCalls();
                 // run teh simulation for this combination of agents
                 runCombination(combi);
@@ -67,6 +80,7 @@ public class CCSim {
                 reset();
             }
             calculateAndSaveCombinationInfo();
+            resetCombination();
         }
         
     } // main end
@@ -83,7 +97,7 @@ public class CCSim {
         }
         
         // Luodaan agentit ku o luettu tarpeelliset jutut
-        int groupCount = 2;
+        int groupCount = 1;
         for(int k = 0; k < groupCount; k++) {
             AgentGroup ag = new AgentGroup("S" + Integer.toString(k+1));
             ag.setCost(9.5);
@@ -94,7 +108,8 @@ public class CCSim {
             lambdas.add(new Double(10.0));            
             ag.setSkills(skills);
             ag.setLambdas(lambdas);
-            
+            ag.setAgentsMin(1);
+            ag.setAgentsMax(2);
             agentGroups.add(ag);
             
             System.out.println("Agentgroup " + ag.getName() + " created.");
@@ -104,8 +119,34 @@ public class CCSim {
         //makeAgentsIntoGroups(groupCount);
     }
     
-    private static void makeCombinations() {
+    private static ArrayList<List<Integer>> makeCombinations(ArrayList<AgentGroup> groups) {
+        ArrayList<List<Integer>> ret = new ArrayList<List<Integer>>();
         
+        ImmutableList toCartesian = null;
+        
+        ArrayList<Set<Integer>> tmpset = new ArrayList<Set<Integer>>();
+        
+        for(int i = 0; i < groups.size(); i++) {
+            AgentGroup gr = groups.get(i);
+            Set<Integer> t = new TreeSet<Integer>();
+            
+            for(int j = gr.getAgentsMin(); j <= gr.getAgentsMax(); j++) {
+                t.add(j);
+            }
+            tmpset.add(t);
+        }
+        
+        toCartesian = ImmutableList.builder().addAll(tmpset).build();
+        Set<List<Integer>> tmpper = Sets.cartesianProduct(toCartesian);
+        
+        Iterator it = tmpper.iterator();
+        
+        while(it.hasNext()) {
+            List<Integer> ob = (List<Integer>)it.next();
+            ret.add(ob);
+        }
+        
+        return ret;
     }
     
     private static void makeCalls() {
@@ -124,7 +165,7 @@ public class CCSim {
             }
             
             c.setCallTime(calltime);
-            c.setAvgLen(10.0);
+            c.setAvgLen(20.0);
             incomingCalls.add(c);
             //System.out.println("calltime: " + calltime);
         }
@@ -138,12 +179,13 @@ public class CCSim {
         }
         */
         
-        System.out.println("In total " + incomingCalls.size() + " calls generated.");
+        //System.out.println("In total " + incomingCalls.size() + " calls generated.");
     } // makeCallss end
     
     private static void makeAgentsIntoGroups(int[] combi) {
+        
         for(int k = 0; k < combi.length; k++) {            
-            
+            //System.out.println("combi k: " + combi[k]);
             AgentGroup agr = agentGroups.get(k);
             
             for(int i = 0; i < combi[k]; i++) {
@@ -280,8 +322,8 @@ public class CCSim {
         /*
          * Juttujen printtailua
          */
-        System.out.println("Puhelut joihin vastattiin alle AWT: " + callsAnsweredIndesiredTime);
-        System.out.println("Puhelut joihin vastattiin yli AWT: " + callsNotAnsweredIndesiredtime);
+        //System.out.println("Puhelut joihin vastattiin alle AWT: " + callsAnsweredIndesiredTime);
+        //System.out.println("Puhelut joihin vastattiin yli AWT: " + callsNotAnsweredIndesiredtime);
         
         //System.out.println("Calls in queue after this combi round: " + queues.get(0).getCallCount());
         
@@ -310,7 +352,14 @@ public class CCSim {
             }
         }
         
-        System.out.println();
+        //System.out.println();
+    }
+    
+    private static void resetCombination() {
+        for(int i = 0; i < agentGroups.size(); i++) {
+            AgentGroup agr = agentGroups.get(i);
+            agr.removeAgents();
+        }
     }
     
     private static void calculateAndSaveRoundInfo(int roundNum, int[] combi) {
@@ -320,7 +369,7 @@ public class CCSim {
             Queue q = queues.get(i);
             tmp += q.getCallCount();
         }
-        System.out.println("Jonoon jaaneet puhelut: " + tmp);
+        //System.out.println("Jonoon jaaneet puhelut: " + tmp);
         
         
         CombinationInfo comp = combinationInfos.get(combinationInfos.size()-1);
@@ -332,12 +381,12 @@ public class CCSim {
         round.setCallsOverAWT(callsNotAnsweredIndesiredtime);
         round.setCallsUnderAWT(callsAnsweredIndesiredTime);
         round.calculateServicelevel();
-        System.out.println("SL for this round: " + round.getServiceLevel());
+        //System.out.println("SL for this round: " + round.getServiceLevel());
         
         comp.addRound(round);
         
         //combinationInfos.add(comp);
-        System.out.println("Roundinfo added to combination info.");
+        //System.out.println("Roundinfo added to combination info.");
     }
     
     private static void calculateAndSaveCombinationInfo() {
@@ -418,6 +467,16 @@ public class CCSim {
             if(ag.getAvailable()) {
                 ret = ag;
             }
+        }
+        
+        return ret;
+    }
+    
+    private static int[] returnIntArray(List<Integer> list) {
+        int[] ret = new int[list.size()];
+        
+        for(int i = 0; i < list.size(); i++) {
+            ret[i] = list.get(i).intValue();
         }
         
         return ret;

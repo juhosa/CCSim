@@ -85,7 +85,9 @@ public class AgentGroup {
         this.agentsMax = agentsMax;
     }
     
-    
+    public void removeAgents() {
+        this.agents.clear();
+    }
     
     
 }
