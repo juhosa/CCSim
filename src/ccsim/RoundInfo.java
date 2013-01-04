@@ -14,6 +14,7 @@ public class RoundInfo {
     private int callsOverAWT;
     private double serviceLevel;
     private int roundNumber;
+    private int callsTotal;
     
     public RoundInfo() {
         this.callsOverAWT = -1;
@@ -53,6 +54,16 @@ public class RoundInfo {
     public void setRoundNumber(int roundNumber) {
         this.roundNumber = roundNumber;
     }
+
+    public int getCallsTotal() {
+        return callsTotal;
+    }
+
+    public void setCallsTotal(int callsTotal) {
+        this.callsTotal = callsTotal;
+    }
+    
+    
     
     public void calculateServicelevel() {
         int sum = this.callsOverAWT + this.callsUnderAWT;

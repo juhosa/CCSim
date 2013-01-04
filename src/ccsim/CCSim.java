@@ -21,18 +21,19 @@ public class CCSim {
     
     public static ArrayList<Queue> queues = new ArrayList<Queue>();
     public static ArrayList<Call> incomingCalls = new ArrayList<Call>();
+    public static int incomimgcallsTEMP;
     
     public static ArrayList<AgentGroup> agentGroups = new ArrayList<AgentGroup>();
     
     public static ArrayList<List<Integer>> combis = new ArrayList<List<Integer>>();
     
-    public static int acceptableAnswerTime = 20;
+    public static int acceptableAnswerTime = 15;
     public static int callsAnsweredIndesiredTime = 0;
     public static int callsNotAnsweredIndesiredtime = 0;
     public static ArrayList<CombinationInfo> combinationInfos = new ArrayList<CombinationInfo>();
     
-    public static int simLength = 200;
-    public static int rounds = 200;
+    public static int simLength = 1800;
+    public static int rounds = 100;
     
     
     /**
@@ -44,12 +45,12 @@ public class CCSim {
         
         combis = makeCombinations(agentGroups);
         
-        for(int i = 0; i < combis.size(); i++) {
-            for(int j = 0; j < combis.get(i).size(); j++) {
-                System.out.print(combis.get(i).get(j) + " ");
-            }
-            System.out.println();
-        }
+//        for(int i = 0; i < combis.size(); i++) {
+//            for(int j = 0; j < combis.get(i).size(); j++) {
+//                System.out.print(combis.get(i).get(j) + " ");
+//            }
+//            System.out.println();
+//        }
         
 //        int[] combi1 = new int[2];
 //        combi1[0] = 2;
@@ -91,10 +92,10 @@ public class CCSim {
         /*
          * Luodaan jonot kun on luettu puhelutyyppien määrä
          */
-        for(int i = 0; i < 1; i++) {
-            Queue q = new Queue("A");
-            queues.add(q);
-        }
+//        for(int i = 0; i < 2; i++) {
+//            Queue q = new Queue("A");
+//            queues.add(q);
+//        }
         
         // Luodaan agentit ku o luettu tarpeelliset jutut
         int groupCount = 1;
@@ -105,15 +106,16 @@ public class CCSim {
             ArrayList<Double> lambdas = new ArrayList<Double>();
             String ski = "A";
             skills.add(ski);
-            lambdas.add(new Double(10.0));            
+            lambdas.add(new Double(240));            
             ag.setSkills(skills);
             ag.setLambdas(lambdas);
             ag.setAgentsMin(1);
-            ag.setAgentsMax(2);
+            ag.setAgentsMax(55);
             agentGroups.add(ag);
             
             System.out.println("Agentgroup " + ag.getName() + " created.");
-            
+            Queue q = new Queue(ski);
+            queues.add(q);
             ski = "B";
         }
         //makeAgentsIntoGroups(groupCount);
@@ -155,7 +157,7 @@ public class CCSim {
         
         while(calltime < simLength) {
             c = new Call("A");
-            c.setArrivalRate(10.0);
+            c.setArrivalRate(5);
             // c.setLength((i+1)*2);
             //calltime += (i+i*2)+2;
             calltime += calculateCallTime(c.getArrivalRate());
@@ -165,11 +167,11 @@ public class CCSim {
             }
             
             c.setCallTime(calltime);
-            c.setAvgLen(20.0);
+            c.setAvgLen(240.0);
             incomingCalls.add(c);
             //System.out.println("calltime: " + calltime);
         }
-        
+        incomimgcallsTEMP = incomingCalls.size();
         // sortataan käännettyyn järjestykseen
         Collections.sort(incomingCalls, new sortByCalltime());
         
@@ -213,6 +215,7 @@ public class CCSim {
                 String calltype = q.callType;
                 for(int j = 0; j < q.getCallCount(); j++) {
                     Call call = q.getCalls().get(j);
+                    boolean noFreeAgents = false;
                     for(int k = 0; k < agentGroups.size(); k++) {
                         AgentGroup agr = agentGroups.get(k);
                         if(agr.getSkills().contains(calltype)) {
@@ -234,11 +237,22 @@ public class CCSim {
                                 }
                                 //System.out.println("Jonosta vastatun puh calltime: " + call.getCallTime()
                                 //        + " ja kesto: " + callLen + " jonotusaika: " + waitTime);
+                                //System.out.println("puheluita jonossa " + q.getCalls().size()
+                                //        + " j: " + j);
+                                
                                 q.getCalls().remove(j);
+                                if(q.getCallCount() == 0) {
+                                    noFreeAgents = true;
+                                }
                             }
                             else {
                                 // Breakkaa pois pitkälle koska ei vapaita ag
+                                //noFreeAgents = true;
+                                break;
                             }
+                        }
+                        if(noFreeAgents) {
+                            break;
                         }
                     }
                 }
@@ -383,6 +397,8 @@ public class CCSim {
         round.calculateServicelevel();
         //System.out.println("SL for this round: " + round.getServiceLevel());
         
+        round.setCallsTotal(incomimgcallsTEMP);
+        
         comp.addRound(round);
         
         //combinationInfos.add(comp);
@@ -407,7 +423,8 @@ public class CCSim {
             tmp += r.getServiceLevel();
         }
         double sl = tmp / (double)ro.size();
-        
+        comb.getAvgSL();
+        System.out.println("combi avgcalls: " + comb.avgNumberOfCalls());
         System.out.println("combi SL: " + sl);
         
     }
